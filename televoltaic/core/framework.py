@@ -93,6 +93,38 @@ class TeleVoltaic:
         self.router.callbacks.extend(_global_router.callbacks)
         self.router.messages.extend(_global_router.messages)
 
+    def load_routes(self) -> None:
+        """Load root urlpatterns from settings and build dispatcher."""
+        from importlib import import_module
+
+        from ..routing.api import BasePattern, flatten
+        from ..routing.dispatcher import Dispatcher
+
+        root = getattr(self.settings, "root_routes", None)
+        if not root:
+            return
+        module_path, _, attr = root.partition(":")
+        if not attr:
+            attr = "urlpatterns"
+        module = import_module(module_path)
+        urlpatterns = getattr(module, attr, None)
+        if urlpatterns is None:
+            raise ConfigurationError(
+                f"Root routes module '{module_path}' missing '{attr}'."
+            )
+        flat = flatten(urlpatterns)
+        # Enforce name uniqueness
+        seen: dict[str, BasePattern] = {}
+        for p in flat:
+            if p.fq_name:
+                if p.fq_name in seen:
+                    raise ConfigurationError(
+                        f"Duplicate route name '{p.fq_name}'."
+                    )
+                seen[p.fq_name] = p
+        self._loaded_patterns = flat
+        self.dispatcher = Dispatcher(flat)
+
     def initialize(self) -> None:
         """Initialize the framework lifecycle."""
         if self._initialized:
