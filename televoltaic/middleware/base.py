@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Awaitable
-from typing import Any, Callable, Protocol
+from collections.abc import Awaitable, Callable
+from typing import Any, Protocol
 
 
 class Update:
     """Represent an incoming update (placeholder)."""
 
     def __init__(self, raw: Any) -> None:
-        """Store raw update payload."""
+        """Store the raw update payload."""
         self.raw = raw
 
 

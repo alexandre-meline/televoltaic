@@ -1,9 +1,15 @@
-"""Routing patterns and decorators for TeleVoltaic."""
+"""Legacy decorator-based routing (deprecated).
+
+This layer is kept for backward compatibility while migrating
+to the declarative patterns API (televoltaic.routing.api).
+"""
 
 from __future__ import annotations
 
+import warnings
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Protocol
+from typing import Any, Protocol
 
 
 class HandlerFunc(Protocol):
@@ -15,7 +21,7 @@ class HandlerFunc(Protocol):
 
 @dataclass
 class Route:
-    """Store route definition metadata."""
+    """Store route definition metadata (legacy)."""
 
     kind: str
     pattern: str
@@ -25,7 +31,7 @@ class Route:
 
 
 class Router:
-    """Register command, callback and message routes."""
+    """Legacy in-memory router used by decorators."""
 
     def __init__(self) -> None:
         """Initialize empty route registries."""
@@ -64,12 +70,23 @@ class Router:
 _global_router = Router()
 
 
+def _deprecation(note: str) -> None:
+    """Emit a deprecation warning for legacy decorators."""
+    warnings.warn(
+        f"[televoltaic.routing.patterns] {note} "
+        "Use the declarative API (televoltaic.routing.api) instead.",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+
+
 def command(
     pattern: str, name: str | None = None
 ) -> Callable[[HandlerFunc], HandlerFunc]:
-    """Register a command handler via decorator."""
+    """Register a command handler via decorator (deprecated)."""
 
     def decorator(func: HandlerFunc) -> HandlerFunc:
+        _deprecation("command() decorator is deprecated.")
         _global_router.add_command(pattern, func, name=name)
         return func
 
@@ -79,9 +96,10 @@ def command(
 def callback(
     pattern: str, name: str | None = None
 ) -> Callable[[HandlerFunc], HandlerFunc]:
-    """Register a callback handler via decorator."""
+    """Register a callback handler via decorator (deprecated)."""
 
     def decorator(func: HandlerFunc) -> HandlerFunc:
+        _deprecation("callback() decorator is deprecated.")
         _global_router.add_callback(pattern, func, name=name)
         return func
 
@@ -91,9 +109,10 @@ def callback(
 def message(
     pattern: str, name: str | None = None
 ) -> Callable[[HandlerFunc], HandlerFunc]:
-    """Register a message handler via decorator."""
+    """Register a message handler via decorator (deprecated)."""
 
     def decorator(func: HandlerFunc) -> HandlerFunc:
+        _deprecation("message() decorator is deprecated.")
         _global_router.add_message(pattern, func, name=name)
         return func
 
