@@ -1,0 +1,105 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "televoltaic"
+dynamic = ["version"]
+description = "A Django-inspired framework for building Telegram bots"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Alexandre Meline", email = "alexandre.meline@example.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: AsyncIO",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Communications :: Chat",
+]
+requires-python = ">=3.9"
+dependencies = [
+    "python-telegram-bot>=20.0",
+    "httpx>=0.24.0",
+    "redis>=4.5.0",
+    "python-dotenv>=1.0.0",
+    "click>=8.0.0",
+    "jinja2>=3.0.0",
+    "pydantic>=2.0.0",
+    "rich>=13.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+docs = [
+    "sphinx>=6.0.0",
+    "sphinx-rtd-theme>=1.2.0",
+]
+
+[project.scripts]
+televoltaic-admin = "televoltaic.management.commands:main"
+
+[project.urls]
+Homepage = "https://github.com/alexandre-meline/televoltaic"
+Repository = "https://github.com/alexandre-meline/televoltaic"
+Documentation = "https://televoltaic.readthedocs.io/"
+"Bug Reports" = "https://github.com/alexandre-meline/televoltaic/issues"
+
+[tool.setuptools.dynamic]
+version = {attr = "televoltaic.__version__.__version__"}
+
+[tool.setuptools.packages.find]
+exclude = ["tests*", "examples*"]
+
+[tool.black]
+line-length = 79
+target-version = ['py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.flake8]
+max-line-length = 79
+extend-ignore = ["D401"]
+per-file-ignores = [
+  "televoltaic/**/__init__.py:D104",
+  "tests/__init__.py:D104",
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+asyncio_mode = "auto"
