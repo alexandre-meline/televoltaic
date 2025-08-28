@@ -75,24 +75,6 @@ class TeleVoltaic:
             app_config: AppConfig = app_config_cls()  # type: ignore[call-arg]
             self.registry.register(app_config)
 
-    def collect_routes(self) -> None:
-        """Collect handler definitions from each app."""
-        from ..routing.patterns import _global_router
-
-        for app in self.registry.all():
-            # Import handlers module to trigger decorator registration
-            handlers_module_path = f"{app.name}.handlers"
-            try:
-                __import__(handlers_module_path, fromlist=[""])
-            except ImportError:
-                # No handlers.py in this app
-                continue
-
-        # Copy routes from global router to instance router
-        self.router.commands.update(_global_router.commands)
-        self.router.callbacks.extend(_global_router.callbacks)
-        self.router.messages.extend(_global_router.messages)
-
     def load_routes(self) -> None:
         """Load root urlpatterns from settings and build dispatcher."""
         from importlib import import_module
@@ -130,7 +112,7 @@ class TeleVoltaic:
         if self._initialized:
             return
         self.load_apps()
-        self.collect_routes()
+        self.load_routes()
         self._initialized = True
 
     def is_ready(self) -> bool:
