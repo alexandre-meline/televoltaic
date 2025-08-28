@@ -77,40 +77,21 @@ class TeleVoltaic:
 
     def collect_routes(self) -> None:
         """Collect handler definitions from each app."""
+        from ..routing.patterns import _global_router
+
         for app in self.registry.all():
-            # Look for handlers.py module in each app
+            # Import handlers module to trigger decorator registration
             handlers_module_path = f"{app.name}.handlers"
             try:
-                handlers_module = __import__(
-                    handlers_module_path, fromlist=[""]
-                )
-                # Iterate through module attributes to find handlers
-                for attr_name in dir(handlers_module):
-                    attr = getattr(handlers_module, attr_name)
-                    if hasattr(attr, "_televoltaic_routes"):
-                        # Get route metadata stored by decorators
-                        for route_info in attr._televoltaic_routes:
-                            if route_info["type"] == "command":
-                                self.router.add_command(
-                                    route_info["pattern"],
-                                    attr,
-                                    route_info.get("name"),
-                                )
-                            elif route_info["type"] == "callback":
-                                self.router.add_callback(
-                                    route_info["pattern"],
-                                    attr,
-                                    route_info.get("name"),
-                                )
-                            elif route_info["type"] == "message":
-                                self.router.add_message(
-                                    route_info["pattern"],
-                                    attr,
-                                    route_info.get("name"),
-                                )
+                __import__(handlers_module_path, fromlist=[""])
             except ImportError:
                 # No handlers.py in this app
                 continue
+
+        # Copy routes from global router to instance router
+        self.router.commands.update(_global_router.commands)
+        self.router.callbacks.extend(_global_router.callbacks)
+        self.router.messages.extend(_global_router.messages)
 
     def initialize(self) -> None:
         """Initialize the framework lifecycle."""
