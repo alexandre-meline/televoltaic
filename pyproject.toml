@@ -11,6 +11,7 @@ license = {text = "MIT"}
 authors = [
     {name = "Alexandre Meline", email = "alexandre.meline@example.com"}
 ]
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -25,7 +26,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Communications :: Chat",
 ]
-requires-python = ">=3.9"
+
 dependencies = [
     "python-telegram-bot>=20.0",
     "httpx>=0.24.0",
@@ -65,6 +66,12 @@ version = {attr = "televoltaic.__version__.__version__"}
 
 [tool.setuptools.packages.find]
 exclude = ["tests*", "examples*"]
+
+[tool.isort]
+profile = "black"
+line_length = 79
+combine_as_imports = true
+known_first_party = "televoltaic"
 
 [tool.black]
 line-length = 79
