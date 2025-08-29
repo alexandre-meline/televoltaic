@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 
-from ..routing.patterns import Router
+from ..logging import init_logging
+from ..routing.api import BasePattern, flatten
+from ..routing.dispatcher import Dispatcher
 from .apps import AppConfig
 from .exceptions import AppRegistryError, ConfigurationError
 
@@ -48,12 +51,24 @@ class AppRegistry:
 class TeleVoltaic:
     """Main entry point for initializing the TeleVoltaic framework."""
 
-    def __init__(self, settings: TeleVoltaicSettings) -> None:
-        """Create TeleVoltaic instance with provided settings."""
+    def __init__(self, settings: TeleVoltaicSettings) -> None:  # noqa: D107
         self.settings = settings
         self.registry = AppRegistry()
-        self.router = Router()
+        self._loaded_patterns: list[BasePattern] = []
+        self.dispatcher: Dispatcher | None = None
         self._initialized = False
+
+        # If a dict-style logging configuration is present, use it.
+        user_logging_cfg = getattr(settings, "logging_config", None)
+        structured = getattr(settings, "structured_logging", False)
+        init_logging(
+            debug=settings.debug,
+            user_config=user_logging_cfg,
+            structured=structured,
+        )
+        self.logger = logging.getLogger("televoltaic.core")
+
+        self.logger.debug("TeleVoltaic framework instantiated.")
 
     def load_apps(self) -> None:
         """Import and register each installed application."""
@@ -78,9 +93,6 @@ class TeleVoltaic:
     def load_routes(self) -> None:
         """Load root urlpatterns from settings and build dispatcher."""
         from importlib import import_module
-
-        from ..routing.api import BasePattern, flatten
-        from ..routing.dispatcher import Dispatcher
 
         root = getattr(self.settings, "root_routes", None)
         if not root:
@@ -114,6 +126,9 @@ class TeleVoltaic:
         self.load_apps()
         self.load_routes()
         self._initialized = True
+        self.logger.info(
+            "TeleVoltaic initialized (debug=%s).", self.settings.debug
+        )
 
     def is_ready(self) -> bool:
         """Return True if framework finished initialization."""
