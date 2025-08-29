@@ -6,11 +6,13 @@ from .__version__ import __author__, __description__, __version__
 from .core.apps import AppConfig
 from .core.framework import TeleVoltaic, TeleVoltaicSettings
 from .db.models import Field, Model
+from .logging.config import init_logging
 
 __all__ = [
     "__version__",
     "__author__",
     "__description__",
+    "init_logging",
     "AppConfig",
     "TeleVoltaic",
     "TeleVoltaicSettings",
